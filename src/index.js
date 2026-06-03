@@ -1,15 +1,15 @@
 import "./style.css";
+import { fetchWeather } from "./weather.js";
 
-console.log("Weather app started");
+const input = document.querySelector("#cityInput");
+const button = document.querySelector("#searchBtn");
 
-async function getWeather() {
-  const response = await fetch(
-    "https://api.open-meteo.com/v1/forecast?latitude=44.2751&longitude=19.8982&hourly=temperature_2m"
-  );
+button.addEventListener("click", async () => {
+  const city = input.value;
 
-  const data = await response.json();
+  const data = await fetchWeather(city);
 
   console.log(data);
-}
+});
 
-getWeather();
+console.log("Weather app started");
