@@ -12,17 +12,22 @@ module.exports = {
     clean: true,
   },
 
-  devServer: {
-    static: "./dist",
+    devServer: {
+    static: {
+        directory: path.resolve(__dirname, "dist"),
+    },
+    devMiddleware: {
+        writeToDisk: true,
+    },
     open: true,
     hot: true,
     port: 8080,
-  },
+    },
 
   module: {
     rules: [
       {
-        test: /\.css$/,
+        test: /\.css$/i,
         use: ["style-loader", "css-loader"],
       },
     ],

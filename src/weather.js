@@ -1,48 +1,41 @@
-export async function fetchWeather(city) {
-  console.log("City received:", city);
+const API_KEY = "R7MHSBMT7Y9PK7U9LQHW7KZ8N";
 
-  const geoResponse = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${city}`
-  );
+async function getWeather(city) {
+  try {
+    const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city}?unitGroup=metric&key=${API_KEY}&contentType=json`;
 
-  const geoData = await geoResponse.json();
+    const response = await fetch(url);
 
-  console.log(geoData);
+    if (!response.ok) {
+      throw new Error("City not found");
+    }
 
-  // SAFETY CHECK
-  if (!geoData.results || geoData.results.length === 0) {
-    console.log("City not found");
-    return;
+    const data = await response.json();
+
+    return formatWeather(data);
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
-
-  const location = geoData.results[0];
-
-  const weatherResponse = await fetch(
-  `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}&longitude=${location.longitude}&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,weathercode&current_weather=true`
-    );
-
-    const weatherData = await weatherResponse.json();
-
-    const current = {
-        temperature: weatherData.current_weather.temperature,
-        windspeed: weatherData.current_weather.windspeed,
-        weathercode: weatherData.current_weather.weathercode
-    };
-
-    const hourly = weatherData.hourly.time.map((time, index) => {
-  return {
-    time: time,
-    temperature: weatherData.hourly.temperature_2m[index],
-    humidity: weatherData.hourly.relative_humidity_2m[index],
-    rainChance: weatherData.hourly.precipitation_probability[index],
-    weathercode: weatherData.hourly.weathercode[index]
-    };
-    });
-
-    return {
-        current,
-        hourly
-    };
-
-    console.log("Location:", location);
 }
+
+function formatWeather(data) {
+  return {
+    location: data.resolvedAddress,
+    description: data.description,
+    current: {
+      temp: data.currentConditions.temp,
+      feelsLike: data.currentConditions.feelslike,
+      humidity: data.currentConditions.humidity,
+      wind: data.currentConditions.windspeed,
+      condition: data.currentConditions.conditions,
+    },
+    forecast: data.days.slice(0, 5).map((day) => ({
+      date: day.datetime,
+      temp: day.temp,
+      condition: day.conditions,
+    })),
+  };
+}
+
+export default getWeather;

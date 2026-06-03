@@ -1,16 +1,24 @@
+import getWeather from "./weather";
+import displayWeather from "./display";
 import "./style.css";
-import { fetchWeather } from "./weather.js";
-import { displayWeather } from "./display.js";
 
+const form = document.querySelector("#searchForm");
 const input = document.querySelector("#cityInput");
-const button = document.querySelector("#searchBtn");
+const errorBox = document.querySelector("#error");
 
-button.addEventListener("click", async () => {
-  const city = input.value;
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  const data = await fetchWeather(city);
+  const city = input.value.trim();
 
-  displayWeather(data);
+  if (!city) return;
+
+  errorBox.textContent = "";
+
+  try {
+    const data = await getWeather(city);
+    displayWeather(data);
+  } catch (err) {
+    errorBox.textContent = "City not found. Try again.";
+  }
 });
-
-console.log("Weather app started");
